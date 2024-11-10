@@ -16,33 +16,185 @@
         /* Full screen setup */
         html, body {
             height: 100%;
+            overflow: hidden; /* Hide scrollbars */
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column; /* Stack main text and caption vertically */
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #004234; /* Updated background color */
         }
 
         /* Centered text styling */
         .centered-text {
-            font-size: 3em; /* Adjust font size as needed */
+            font-size: 3em;
             text-align: center;
-            line-height: 1.5; /* Space between lines */
-            color: #333;
+            line-height: 1.5;
+            color: #fff;
+            white-space: pre-wrap; /* Preserve line breaks for typing effect */
+            overflow: hidden; /* Hide overflowing text during typing */
+            border-right: 3px solid #fff; /* Blinking cursor effect */
+            animation: blink 0.7s steps(1) infinite; /* Blinking cursor */
         }
 
         /* Caption styling */
         .caption {
-            font-size: 0.5em; /* Smaller font size for caption */
-            color: #555;
-            margin-top: 55px;
+            font-size: 3em;
+            color: #ddd;
+            margin-top: 50px; /* Add 50px margin below the main text */
+            white-space: nowrap; /* Prevent line breaks in caption */
+            opacity: 0; /* Initially hidden until main text is typed */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Enlarged number styling */
+        .caption .large-number {
+            font-size: 2.5em; /* 5x larger than regular text */
+            color: #ffdd00; /* Different color for emphasis */
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center; /* Center the number */
+        }
+
+        /* Fireworks canvas */
+        #fireworksCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5; /* Behind the text */
+            pointer-events: none; /* Make canvas non-interactive */
+        }
+
+        /* Cursor blink animation */
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="centered-text">
-        З Днем Народження,<br> ПЛАСТ Берлін!
-        <div class="caption">... нам вже 7 рочків 🎉</div>
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="centered-text" id="typedText"></div>
+    <div class="caption" id="caption">
+        ... нам вже <span class="large-number">7</span> рочків 🎉
     </div>
+
+    <script>
+        // Fireworks animation setup
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function randomColor() {
+            return `hsl(${Math.random() * 360}, 100%, 70%)`;
+        }
+
+        function Particle(x, y) {
+            this.x = x;
+            this.y = y;
+            this.size = Math.random() * 4 + 1;
+            this.speedX = (Math.random() - 0.5) * 10;
+            this.speedY = (Math.random() - 0.5) * 10;
+            this.color = randomColor();
+            this.opacity = 1;
+            this.fade = 0.01;
+        }
+
+        Particle.prototype.update = function () {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.opacity -= this.fade;
+        };
+
+        Particle.prototype.draw = function () {
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.opacity;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        function createFirework(x, y) {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((particle, index) => {
+                particle.update();
+                particle.draw();
+                if (particle.opacity <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(() => {
+            createFirework(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height
+            );
+        }, 800);
+
+        animate();
+
+        // Typing animation setup for main text and caption
+        const mainText = "З Днем Народження,\nПЛАСТ Берлін!";
+        const mainTextElement = document.getElementById('typedText');
+        const captionTextElement = document.getElementById('caption');
+        let mainIndex = 0;
+
+        // Typing main text function
+        function typeMainText() {
+            if (mainIndex < mainText.length) {
+                mainTextElement.textContent += mainText[mainIndex];
+                mainIndex++;
+                setTimeout(typeMainText, 100); // Adjust speed as needed
+            } else {
+                // Remove blinking cursor after main text is fully typed
+                mainTextElement.style.borderRight = 'none';
+
+                // Show the caption with typing animation after main text
+                captionTextElement.style.opacity = 1;
+                typeCaptionText();
+            }
+        }
+
+        // Typing caption text function
+        function typeCaptionText() {
+            const caption = "... нам вже 7 рочків 🎉";
+            let captionIndex = 0;
+            captionTextElement.textContent = ''; // Clear initial content
+
+            function typeNext() {
+                if (captionIndex < caption.length) {
+                    captionTextElement.innerHTML = caption.slice(0, captionIndex + 1).replace('7', '<span class="large-number">7</span>');
+                    captionIndex++;
+                    setTimeout(typeNext, 100); // Adjust speed as needed
+                }
+            }
+            typeNext();
+        }
+
+        // Start typing main text effect
+        typeMainText();
+    </script>
 </body>
 </html>
