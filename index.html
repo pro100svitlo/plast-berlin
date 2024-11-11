@@ -16,47 +16,60 @@
         /* Full screen setup */
         html, body {
             height: 100%;
-            overflow: hidden; /* Hide scrollbars */
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column; /* Stack main text and caption vertically */
+            flex-direction: column;
             font-family: Arial, sans-serif;
-            background-color: #004234; /* Updated background color */
+            background-color: #004234;
+        }
+
+        /* Container to hold image and text */
+        .content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column; /* Stack vertically by default */
+            text-align: center;
+        }
+
+        /* Image styling */
+        .logo {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 50px; /* Default margin when stacked vertically */
         }
 
         /* Centered text styling */
         .centered-text {
             font-size: 1.5em;
-            text-align: center;
             line-height: 1.5;
             color: #fff;
-            white-space: pre-wrap; /* Preserve line breaks for typing effect */
-            overflow: hidden; /* Hide overflowing text during typing */
-            border-right: 3px solid #fff; /* Blinking cursor effect */
-            animation: blink 0.7s steps(1) infinite; /* Blinking cursor */
+            white-space: pre-wrap;
+            overflow: hidden;
+            border-right: 3px solid #fff;
+            animation: blink 0.7s steps(1) infinite;
         }
 
         /* Caption styling */
         .caption {
             font-size: 1.5em;
             color: #ddd;
-            margin-top: 50px; /* Add 50px margin below the main text */
-            white-space: nowrap; /* Prevent line breaks in caption */
-            opacity: 0; /* Initially hidden until main text is typed */
+            margin-top: 50px;
+            white-space: nowrap;
+            opacity: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
         }
 
         /* Enlarged number styling */
         .caption .large-number {
-            font-size: 2em; /* 5x larger than regular text */
-            color: #ffdd00; /* Different color for emphasis */
+            font-size: 2em;
+            color: #ffdd00;
             display: inline-block;
             vertical-align: middle;
-            text-align: center; /* Center the number */
         }
 
         /* Fireworks canvas */
@@ -66,8 +79,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 5; /* Behind the text */
-            pointer-events: none; /* Make canvas non-interactive */
+            z-index: 5;
+            pointer-events: none;
         }
 
         /* Cursor blink animation */
@@ -76,17 +89,34 @@
                 border-color: transparent;
             }
         }
+
+        /* Responsive layout adjustment */
+        @media (min-width: 600px) {
+            .content {
+                flex-direction: row; /* Horizontal layout when screen width allows */
+            }
+            .logo {
+                margin-bottom: 0; /* Remove bottom margin */
+                margin-right: 50px; /* Add right margin when horizontal */
+            }
+        }
     </style>
 </head>
 <body>
     <canvas id="fireworksCanvas"></canvas>
-    <div class="centered-text" id="typedText"></div>
-    <div class="caption" id="caption">
-        ... нам вже <span class="large-number">7</span> рочків 🎉
+
+    <div class="content">
+        <img src="assets/logo.png" alt="PLAST Berlin Logo" class="logo" />
+        <div>
+            <div class="centered-text" id="typedText"></div>
+            <div class="caption" id="caption">
+                ... нам вже <span class="large-number">7</span> рочків 🎉
+            </div>
+        </div>
     </div>
 
     <script>
-        // Fireworks animation setup
+        // Fireworks animation and typing effect scripts (unchanged)
         const canvas = document.getElementById('fireworksCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -166,12 +196,9 @@
             if (mainIndex < mainText.length) {
                 mainTextElement.textContent += mainText[mainIndex];
                 mainIndex++;
-                setTimeout(typeMainText, 100); // Adjust speed as needed
+                setTimeout(typeMainText, 100);
             } else {
-                // Remove blinking cursor after main text is fully typed
                 mainTextElement.style.borderRight = 'none';
-
-                // Show the caption with typing animation after main text
                 captionTextElement.style.opacity = 1;
                 typeCaptionText();
             }
@@ -181,19 +208,18 @@
         function typeCaptionText() {
             const caption = "... нам вже 7 рочків 🎉";
             let captionIndex = 0;
-            captionTextElement.textContent = ''; // Clear initial content
+            captionTextElement.textContent = '';
 
             function typeNext() {
                 if (captionIndex < caption.length) {
                     captionTextElement.innerHTML = caption.slice(0, captionIndex + 1).replace('7', '<span class="large-number">7</span>');
                     captionIndex++;
-                    setTimeout(typeNext, 100); // Adjust speed as needed
+                    setTimeout(typeNext, 100);
                 }
             }
             typeNext();
         }
 
-        // Start typing main text effect
         typeMainText();
     </script>
 </body>
